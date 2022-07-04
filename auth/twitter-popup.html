@@ -27,23 +27,21 @@ limitations under the License.
 
   <link rel="stylesheet" href="main.css">
 
-  <!-- Firebase -->
-  <!-- ***********************************************************************************************************************
-       * TODO(DEVELOPER): Paste the initialization snippet from: Firebase Console > Overview > Add Firebase to your web app. *
-       *********************************************************************************************************************** -->
+  <!-- Import and configure the Firebase SDK -->
+  <!-- These scripts are made available when the app is served or deployed on Firebase Hosting -->
+  <!-- If you do not serve/host your project using Firebase Hosting see https://firebase.google.com/docs/web/setup -->
+  <script src="/__/firebase/9.8.3/firebase-app-compat.js"></script>
+  <script src="/__/firebase/9.8.3/firebase-auth-compat.js"></script>
+  <script src="/__/firebase/init.js"></script>
 
   <script type="text/javascript">
 
     /**
      * Function called when clicking the Login/Logout button.
      */
-    // [START buttoncallback]
     function toggleSignIn() {
       if (!firebase.auth().currentUser) {
-        // [START createprovider]
         var provider = new firebase.auth.TwitterAuthProvider();
-        // [END createprovider]
-        // [START signin]
         firebase.auth().signInWithPopup(provider).then(function(result) {
           // This gives you a the Twitter OAuth 1.0 Access Token and Secret.
           // You can use these server side with your app's credentials to access the Twitter API.
@@ -51,10 +49,8 @@ limitations under the License.
           var secret = result.credential.secret;
           // The signed-in user info.
           var user = result.user;
-          // [START_EXCLUDE]
           document.getElementById('quickstart-oauthtoken').textContent = token;
           document.getElementById('quickstart-oauthsecret').textContent = secret;
-          // [END_EXCLUDE]
         }).catch(function(error) {
           // Handle Errors here.
           var errorCode = error.code;
@@ -63,7 +59,6 @@ limitations under the License.
           var email = error.email;
           // The firebase.auth.AuthCredential type that was used.
           var credential = error.credential;
-          // [START_EXCLUDE]
           if (errorCode === 'auth/account-exists-with-different-credential') {
             alert('You have already signed up with a different auth provider for that email.');
             // If you are using multiple auth providers on your app you should handle linking
@@ -71,37 +66,21 @@ limitations under the License.
           } else {
             console.error(error);
           }
-          // [END_EXCLUDE]
         });
-        // [END signin]
       } else {
-        // [START signout]
         firebase.auth().signOut();
-        // [END signout]
       }
-      // [START_EXCLUDE]
       document.getElementById('quickstart-sign-in').disabled = true;
-      // [END_EXCLUDE]
     }
-    // [END buttoncallback]
+
 
     /**
-     * initApp handles setting up the Firebase context and registering
-     * callbacks for the auth status.
-     *
-     * The core initialization is in firebase.App - this is the glue class
-     * which stores configuration. We provide an app name here to allow
-     * distinguishing multiple app instances.
-     *
-     * This method also registers a listener with firebase.auth().onAuthStateChanged.
-     * This listener is called when the user is signed in or out, and that
-     * is where we update the UI.
-     *
-     * When signed in, we also authenticate to the Firebase Realtime Database.
+     * initApp handles setting up UI event listeners and registering Firebase auth listener:
+     *  - firebase.auth().onAuthStateChanged: This listener is called when the user is signed in or
+     *    out, and that is where we update the UI.
      */
     function initApp() {
       // Listening for auth state changes.
-      // [START authstatelistener]
       firebase.auth().onAuthStateChanged(function(user) {
         if (user) {
           // User is signed in.
@@ -111,37 +90,20 @@ limitations under the License.
           var photoURL = user.photoURL;
           var isAnonymous = user.isAnonymous;
           var uid = user.uid;
-          var refreshToken = user.refreshToken;
           var providerData = user.providerData;
-          // [START_EXCLUDE]
           document.getElementById('quickstart-sign-in-status').textContent = 'Signed in';
           document.getElementById('quickstart-sign-in').textContent = 'Sign out';
-          document.getElementById('quickstart-account-details').textContent = JSON.stringify({
-            displayName: displayName,
-            email: email,
-            emailVerified: emailVerified,
-            photoURL: photoURL,
-            isAnonymous: isAnonymous,
-            uid: uid,
-            refreshToken: refreshToken,
-            providerData: providerData
-          }, null, '  ');
-          // [END_EXCLUDE]
+          document.getElementById('quickstart-account-details').textContent = JSON.stringify(user, null, '  ');
         } else {
           // User is signed out.
-          // [START_EXCLUDE]
           document.getElementById('quickstart-sign-in-status').textContent = 'Signed out';
           document.getElementById('quickstart-sign-in').textContent = 'Sign in with Twitter';
           document.getElementById('quickstart-account-details').textContent = 'null';
           document.getElementById('quickstart-oauthtoken').textContent = 'null';
           document.getElementById('quickstart-oauthsecret').textContent = 'null';
-          // [END_EXCLUDE]
         }
-        // [START_EXCLUDE]
         document.getElementById('quickstart-sign-in').disabled = false;
-        // [END_EXCLUDE]
       });
-      // [END authstatelistener]
 
       document.getElementById('quickstart-sign-in').addEventListener('click', toggleSignIn, false);
     }

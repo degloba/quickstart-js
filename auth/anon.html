@@ -27,10 +27,12 @@ limitations under the License.
 
   <link rel="stylesheet" href="main.css">
 
-  <!-- Firebase -->
-  <!-- ***********************************************************************************************************************
-       * TODO(DEVELOPER): Paste the initialization snippet from: Firebase Console > Overview > Add Firebase to your web app. *
-       *********************************************************************************************************************** -->
+  <!-- Import and configure the Firebase SDK -->
+  <!-- These scripts are made available when the app is served or deployed on Firebase Hosting -->
+  <!-- If you do not serve/host your project using Firebase Hosting see https://firebase.google.com/docs/web/setup -->
+  <script src="/__/firebase/9.8.3/firebase-app-compat.js"></script>
+  <script src="/__/firebase/9.8.3/firebase-auth-compat.js"></script>
+  <script src="/__/firebase/init.js"></script>
 
   <script type="text/javascript">
 
@@ -39,71 +41,46 @@ limitations under the License.
      */
     function toggleSignIn() {
       if (firebase.auth().currentUser) {
-        // [START signout]
         firebase.auth().signOut();
-        // [END signout]
       } else {
-        // [START authanon]
         firebase.auth().signInAnonymously().catch(function(error) {
           // Handle Errors here.
           var errorCode = error.code;
           var errorMessage = error.message;
-          // [START_EXCLUDE]
           if (errorCode === 'auth/operation-not-allowed') {
             alert('You must enable Anonymous auth in the Firebase Console.');
           } else {
             console.error(error);
           }
-          // [END_EXCLUDE]
         });
-        // [END authanon]
       }
       document.getElementById('quickstart-sign-in').disabled = true;
     }
 
+
     /**
-     * Handles registering callbacks for the auth status.
-     *
-     * This method registers a listener with firebase.auth().onAuthStateChanged. This listener is called when
-     * the user is signed in or out, and that is where we update the UI.
-     *
-     * When signed in, we also authenticate to the Firebase Realtime Database.
+     * initApp handles setting up UI event listeners and registering Firebase auth listeners:
+     *  - firebase.auth().onAuthStateChanged: This listener is called when the user is signed in or
+     *    out, and that is where we update the UI.
      */
     function initApp() {
       // Listening for auth state changes.
-      // [START authstatelistener]
       firebase.auth().onAuthStateChanged(function(user) {
         if (user) {
           // User is signed in.
           var isAnonymous = user.isAnonymous;
           var uid = user.uid;
-          // [START_EXCLUDE]
           document.getElementById('quickstart-sign-in-status').textContent = 'Signed in';
           document.getElementById('quickstart-sign-in').textContent = 'Sign out';
-          document.getElementById('quickstart-account-details').textContent = JSON.stringify({
-            displayName: displayName,
-            email: email,
-            emailVerified: emailVerified,
-            photoURL: photoURL,
-            isAnonymous: isAnonymous,
-            uid: uid,
-            refreshToken: refreshToken,
-            providerData: providerData
-          }, null, '  ');
-          // [END_EXCLUDE]
+          document.getElementById('quickstart-account-details').textContent = JSON.stringify(user, null, '  ');
         } else {
           // User is signed out.
-          // [START_EXCLUDE]
           document.getElementById('quickstart-sign-in-status').textContent = 'Signed out';
           document.getElementById('quickstart-sign-in').textContent = 'Sign in';
           document.getElementById('quickstart-account-details').textContent = 'null';
-          // [END_EXCLUDE]
         }
-        // [START_EXCLUDE]
         document.getElementById('quickstart-sign-in').disabled = false;
-        // [END_EXCLUDE]
       });
-      // [END authstatelistener]
 
       document.getElementById('quickstart-sign-in').addEventListener('click', toggleSignIn, false);
     }
